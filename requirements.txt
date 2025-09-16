@@ -1,0 +1,5 @@
+discord.py
+pymongo
+redis
+mongomock
+requests
