@@ -7,8 +7,8 @@ class ReportService:
     def __init__(self, character_repository: MongoDBRepository):
         self.character_repository = character_repository
 
-    def get_progress_report(self, character_id: str) -> Dict[str, Any]:
-        character = self.character_repository.get_character(character_id)
+    async def get_progress_report(self, character_id: str) -> Dict[str, Any]:
+        character = await self.character_repository.get_character(character_id)
         if not character:
             raise CharacterNotFoundError(f"Personagem com ID '{character_id}' não encontrado.")
 
@@ -21,9 +21,9 @@ class ReportService:
             "attributes": character.attributes,
             "modifiers": character.modifiers,
             "masteries": character.masteries,
-            "ph_points": character.ph_points,
-            "status_points_available": character.status_points,
-            "mastery_points_available": character.mastery_points,
+            "ph_points": character.pontos.get("ph", {}).get("total", 0),
+            "status_points_available": character.pontos.get("status", {}).get("total", 0),
+            "mastery_points_available": character.pontos.get("mastery", {}).get("total", 0),
             "hp": f"{character.hp}/{character.max_hp}",
             "chakra": f"{character.chakra}/{character.max_chakra}",
             "fp": f"{character.fp}/{character.max_fp}",
@@ -31,8 +31,8 @@ class ReportService:
         }
         return report
 
-    def get_usage_statistics(self) -> Dict[str, Any]:
-        all_characters = self.character_repository.get_all_characters()
+    async def get_usage_statistics(self) -> Dict[str, Any]:
+        all_characters = await self.character_repository.get_all_characters()
         
         total_characters = len(all_characters)
         

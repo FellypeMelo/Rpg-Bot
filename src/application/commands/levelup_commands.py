@@ -3,7 +3,10 @@ from typing import Optional, Dict
 from src.core.services.levelup_service import LevelUpService
 from src.application.dtos.levelup_dto import ApplyLevelUpDTO, LevelUpResponseDTO
 from src.utils.exceptions.application_exceptions import LevelUpError, InvalidInputError, CharacterNotFoundError
-from src.infrastructure.database.mongodb_repository import MongoDBRepository # For instantiation
+from src.infrastructure.database.mongodb_repository import MongoDBRepository
+from src.infrastructure.database.transformation_repository import TransformationRepository
+from src.infrastructure.database.class_repository import ClassRepository
+from src.core.services.character_service import CharacterService
 import os
 import json # For parsing JSON strings for points
 import ast # For safely evaluating string literals
@@ -27,18 +30,22 @@ class LevelUpCommands(commands.Cog):
             try:
                 if isinstance(status_points, int):
                     status_points = str(status_points)
-                parsed_status_points = ast.literal_eval(status_points)
+                parsed_status_points = json.loads(status_points)
                 if not isinstance(parsed_status_points, dict):
                     raise InvalidInputError("O valor para 'status_points' deve ser um objeto JSON (dicionário).")
+            except json.JSONDecodeError:
+                raise InvalidInputError("Formato JSON inválido para 'status_points'. Certifique-se de que as chaves e valores de string estão entre aspas duplas.")
             except (ValueError, SyntaxError):
                 raise InvalidInputError("Formato inválido para 'status_points'. Certifique-se de que é um dicionário Python válido.")
 
             try:
                 if isinstance(mastery_points, int):
                     mastery_points = str(mastery_points)
-                parsed_mastery_points = ast.literal_eval(mastery_points)
+                parsed_mastery_points = json.loads(mastery_points)
                 if not isinstance(parsed_mastery_points, dict):
                     raise InvalidInputError("O valor para 'mastery_points' deve ser um objeto JSON (dicionário).")
+            except json.JSONDecodeError:
+                raise InvalidInputError("Formato JSON inválido para 'mastery_points'. Certifique-se de que as chaves e valores de string estão entre aspas duplas.")
             except (ValueError, SyntaxError):
                 raise InvalidInputError("Formato inválido para 'mastery_points'. Certifique-se de que é um dicionário Python válido.")
 
@@ -60,16 +67,16 @@ class LevelUpCommands(commands.Cog):
                 ph_points_spent=parsed_ph_points
             )
             
-            updated_character = self.levelup_service.apply_level_up(
+            updated_character = await self.levelup_service.level_up_character(
                 apply_dto.character_id,
                 apply_dto.levels_to_gain,
-                apply_dto.status_points_spent,
-                apply_dto.mastery_points_spent,
-                apply_dto.ph_points_spent
+                # Os pontos de status, maestria e PH são gerenciados internamente pelo LevelUpService
+                # e não são passados diretamente para level_up_character.
+                # A lógica de gasto de pontos será implementada no LevelUpService.
             )
 
             response_dto = LevelUpResponseDTO(
-                character_id=updated_character.id,
+                character_id=str(updated_character.id),
                 new_level=updated_character.level,
                 updated_attributes=updated_character.attributes,
                 updated_modifiers=updated_character.modifiers,
@@ -80,9 +87,9 @@ class LevelUpCommands(commands.Cog):
                 updated_fp=updated_character.fp,
                 updated_max_fp=updated_character.max_fp,
                 updated_masteries=updated_character.masteries,
-                remaining_ph_points=updated_character.ph_points,
-                remaining_status_points=updated_character.status_points,
-                remaining_mastery_points=updated_character.mastery_points
+                remaining_ph_points=updated_character.pontos["ph"]["total"],
+                remaining_status_points=updated_character.pontos["status"]["total"],
+                remaining_mastery_points=updated_character.pontos["mastery"]["total"]
             )
 
             response_message = (
@@ -110,10 +117,17 @@ class LevelUpCommands(commands.Cog):
             await context.send(f"Ocorreu um erro inesperado: {e}")
 
 async def setup(bot: commands.Bot):
-    mongo_repo = MongoDBRepository(
-        connection_string=os.getenv("MONGODB_CONNECTION_STRING", "mongodb://localhost:27017/"),
-        database_name=os.getenv("MONGODB_DATABASE_NAME", "rpg_bot_db"),
-        collection_name=os.getenv("MONGODB_CHARACTER_COLLECTION", "characters")
+    connection_string = os.getenv("MONGODB_CONNECTION_STRING", "mongodb://localhost:27017/")
+    database_name = os.getenv("MONGODB_DATABASE_NAME", "rpg_bot_db")
+
+    mongo_repo = MongoDBRepository(connection_string=connection_string, database_name=database_name)
+    await mongo_repo.connect() # Conectar assincronamente
+    transformation_repository = TransformationRepository(mongo_repo)
+    class_repository = ClassRepository(mongodb_repository=mongo_repo)
+    character_service = CharacterService(
+        character_repository=mongo_repo,
+        transformation_repository=transformation_repository,
+        class_repository=class_repository
     )
-    levelup_service = LevelUpService(character_repository=mongo_repo)
+    levelup_service = LevelUpService(character_service=character_service, class_repository=class_repository)
     await bot.add_cog(LevelUpCommands(bot, levelup_service))

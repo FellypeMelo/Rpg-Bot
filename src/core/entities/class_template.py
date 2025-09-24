@@ -1,10 +1,12 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Any
+from bson.objectid import ObjectId
 
 @dataclass
 class ClassTemplate:
     name: str
     description: str
+    id: ObjectId = field(default_factory=ObjectId)
     base_attributes: Dict[str, int] = field(default_factory=lambda: {
         "strength": 10, "dexterity": 10, "constitution": 10,
         "intelligence": 10, "wisdom": 10, "charisma": 10
@@ -23,6 +25,7 @@ class ClassTemplate:
 
     def to_dict(self):
         return {
+            "_id": str(self.id),
             "name": self.name,
             "description": self.description,
             "base_attributes": self.base_attributes,
@@ -37,9 +40,16 @@ class ClassTemplate:
 
     @staticmethod
     def from_dict(data: Dict):
+        # Accept multiple possible key names to be tolerant with existing DB documents
+        raw_id = data.get("_id") or data.get("id")
+        # name may be stored as 'name' or 'nome'
+        name = data.get("name") or data.get("nome") or "Unknown"
+        description = data.get("description") or data.get("descricao") or ""
+
         return ClassTemplate(
-            name=data["name"],
-            description=data["description"],
+            id=ObjectId(raw_id) if raw_id is not None else ObjectId(),
+            name=name,
+            description=description,
             base_attributes=data.get("base_attributes", {}),
             hp_formula=data.get("hp_formula", "1d1"),
             chakra_formula=data.get("chakra_formula", "1d1"),

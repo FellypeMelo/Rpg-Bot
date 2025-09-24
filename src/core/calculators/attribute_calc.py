@@ -12,8 +12,8 @@ class AttributeCalculator:
         chakra_formula = class_template.chakra_formula
         fp_formula = class_template.fp_formula
 
-        hp = DiceRoller.roll_dice(hp_formula)
-        chakra = DiceRoller.roll_dice(chakra_formula)
-        fp = DiceRoller.roll_dice(fp_formula)
+        hp_roll, _ = DiceRoller.roll_dice(hp_formula)
+        chakra_roll, _ = DiceRoller.roll_dice(chakra_formula)
+        fp_roll, _ = DiceRoller.roll_dice(fp_formula)
 
-        return hp, chakra, fp
+        return hp_roll, chakra_roll, fp_roll

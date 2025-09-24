@@ -2,6 +2,15 @@ from dataclasses import dataclass, field
 from typing import Optional, Dict, List
 
 @dataclass
+class InitiativeEntryDTO:
+    session_id: str
+    character_name: str
+    modifier: int
+    player_id: str
+    character_id: Optional[str] = None
+    is_npc: bool = False
+
+@dataclass
 class StartCombatSessionDTO:
     character_id: str
     guild_id: str

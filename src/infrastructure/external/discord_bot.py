@@ -16,9 +16,13 @@ class RPGDiscordBot(commands.Bot):
         super().__init__(command_prefix=command_prefix, intents=intents)
         self.initial_extensions = [
             'src.application.commands.character_commands',
+            'src.application.commands.points_commands',
             'src.application.commands.levelup_commands',
             'src.application.commands.combat_commands',
             'src.application.commands.report_commands',
+            'src.application.commands.dice_commands',
+            'src.application.commands.help_command',
+            'src.application.commands.test_commands',
         ]
 
     async def setup_hook(self):

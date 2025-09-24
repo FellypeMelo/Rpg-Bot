@@ -1,59 +1,53 @@
-# RPG Bot Discord
+# 🎮 Bem-vindo ao RPG Bot v2.2!
 
-## Sobre o Projeto
-Bot de RPG para Discord com comandos de criação de personagens, combate, progressão e relatórios. Utiliza arquitetura modular com MongoDB/Redis para persistência.
+Seu assistente definitivo para campanhas de RPG no Discord. Gerencie fichas, combates por turnos, transformações e muito mais!
 
-## Requisitos
-- Python 3.11+
-- Dependências: `pip install -r requirements.txt`
-- Variáveis de ambiente:
-  ```env
-  DISCORD_TOKEN=seu_token_aqui
-  MONGODB_URI=mongodb://localhost:27017
-  REDIS_URI=redis://localhost:6379
-  ```
+## 🚀 Primeiros Passos (Copie e Cole!)
 
-## Configuração
-Ajuste os settings em `config/settings/development_settings.py` para:
-- Tempo de sessão
-- Configurações de banco de dados
-- Parâmetros de logging
+1.  **Crie seu personagem:**
+    ```!ficha criar "Seu Nome" SuaClasse```
+    *Exemplo:* `!ficha criar "Aragorn" Desgarrado`
 
-## Como Rodar
-```bash
-# Instalar dependências
-pip install -r requirements.txt
+2.  **Defina seu favorito (opcional, mas útil!):**
+    ```!favorito "Seu Nome"```
+    *Exemplo:* `!favorito "Aragorn"`
 
-# Instalar projeto em modo desenvolvedor
-pip install -e .
+3.  **Veja sua ficha a qualquer momento:**
+    ```!ficha ver "Seu Nome"```
+    *Exemplo:* `!ficha ver "Aragorn"`
 
-# Iniciar o bot
-cd src/infrastructure/external
-python discord_bot.py
-```
+## ⚔️ Comandos Essenciais (Simples e Diretos)
 
-## Comandos Disponíveis
-Veja referência completa em [`docs/api/commands_reference.md`](docs/api/commands_reference.md). Exemplos:
-- `!criar_personagem` - Cria novo personagem
-- `!atacar` - Inicia ataque em combate
-- `!subir_nivel` - Atualiza nível de personagem
+| Comando | O que faz | Exemplo Fácil |
+| :--- | :--- | :--- |
+| `!ficha criar "Nome" Classe` | Cria um novo personagem. | `!ficha criar "Gandalf" Mago` |
+| `!up "Nome" N` | Sobe N níveis. | `!up "Gandalf" 1` |
+| `!pontos "Nome"` | Mostra seus pontos. | `!pontos "Gandalf"` |
+| `!gastar status "Nome" atr qtd` | Gasta pontos de status. | `!gastar "Gandalf" int 5` |
+| `!gastar ph "Nome" qtd "motivo"` | Gasta PH. | `!gastar "Gandalf" 1 "Bola de Fogo"` |
+| `!favorito "Nome"` | Define favorito. | `!favorito "Gandalf"` |
+| `!rodar atr [bonus]` | Rola 1d20 + mod. | `!rodar sab` ou `!rodar car 2` |
 
-## Estrutura do Projeto
-```bash
-src/
-├── application/       # Comandos Discord e validações
-├── core/              # Lógica de domínio (atributos, dados, combate)
-├── infrastructure/    # Implementações externas (Discord, MongoDB, Redis)
-└── utils/             # Funções auxiliares e exceções
+## ✨ Transformações (Poderes Especiais)
 
-docs/                  # Documentação técnica e de usuário
-config/                # Configurações e constantes
-scripts/               # Manutenção e backup
-tests/                 # Testes unitários e integração
-```
+| Comando | O que faz | Exemplo Fácil |
+| :--- | :--- | :--- |
+| `!addtransformacao "Nome" "Poder"` | (Mestre) Adiciona um poder. | `!addtransformacao "Gandalf" "Modo Branco"` |
+| `!edittransformacao "Nome" {"bonus": {"atributos": {"multiplicadores": {"forca": 2.0, "constituicao": 1.5}}}, "duracao_segundos": 600}` | (Mestre) Edita um poder. | `!edittransformacao "Modo Branco" {"bonus": {"atributos": {"multiplicadores": {"forca": 2.0}}}}` |
+| `!transformar "Nome" "Poder"` | Ativa seu poder. | `!transformar "Gandalf" "Modo Branco"` |
+| `!destransformar "Nome" "Poder"` | Desativa seu poder. | `!destransformar "Gandalf" "Modo Branco"` |
 
-## Contribuição
-1. Crie branch feature
-2. Execute testes com `pytest tests/`
-3. Mantenha PEP8 e docstrings
-4. Submeta pull request com descrição detalhada
+## 🎲 Combate por Turnos (Passo a Passo)
+
+1.  **Mestre inicia:** `!startcombat`
+2.  **Todos entram:** `!iniciativa "Gandalf" "Frodo" Orc+2`
+3.  **Mestre começa:** `!comecar`
+4.  **Jogador age (seu turno):** `!dano 10 Orc` ou `!cura 5`
+5.  **Mestre avança:** `!proximo`
+6.  **Mestre termina:** `!endcombat`
+
+## ❓ Precisa de Ajuda?
+- `!help` — Mostra todos os comandos.
+- `!help rodar` — Explica um comando específico.
+
+> **Dica Rápida:** Use `!favorito` e depois comandos como `!rodar for` sem precisar digitar o nome do personagem toda vez!

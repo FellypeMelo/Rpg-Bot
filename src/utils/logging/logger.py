@@ -31,9 +31,19 @@ def setup_logging(log_file: str = 'rpg_bot.log', level=logging.INFO, max_bytes: 
 
     return logger
 
+def get_logger(name: str) -> logging.Logger:
+    """
+    Retorna uma instância de logger configurada.
+    """
+    return logging.getLogger(name)
+
 # Example usage (can be removed or modified for actual integration)
 if __name__ == '__main__':
-    logger = setup_logging(log_file='logs/rpg_bot.log', level=logging.DEBUG)
+    # Setup logging for the main application logger
+    setup_logging(log_file='logs/rpg_bot.log', level=logging.DEBUG)
+    
+    # Get a logger for a specific module
+    logger = get_logger(__name__)
     logger.debug("This is a debug message.")
     logger.info("This is an info message.")
     logger.warning("This is a warning message.")

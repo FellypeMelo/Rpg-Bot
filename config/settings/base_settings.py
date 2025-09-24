@@ -3,7 +3,7 @@ import os
 class BaseSettings:
     # Discord Bot Settings
     DISCORD_TOKEN: str = os.getenv("DISCORD_TOKEN", "")
-    COMMAND_PREFIX: str = "!"
+    COMMAND_PREFIX: str = os.getenv("COMMAND_PREFIX", "!")
 
     # MongoDB Settings
     MONGODB_CONNECTION_STRING: str = os.getenv("MONGODB_CONNECTION_STRING", "mongodb://localhost:27017/")
